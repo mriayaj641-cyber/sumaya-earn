@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sumaya Earn</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f6fa;color:#182230}
+.app{max-width:480px;margin:auto;min-height:100vh;background:#fff}
+header{padding:28px 20px 20px;background:linear-gradient(135deg,#6c4cff,#9a6cff);color:white;border-radius:0 0 24px 24px}
+h1{margin:0 0 5px;font-size:28px}.muted{opacity:.85;font-size:14px}
+.balance{margin-top:18px;background:rgba(255,255,255,.16);padding:18px;border-radius:18px}
+.balance b{font-size:30px;display:block;margin-top:5px}
+main{padding:18px 16px 90px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{border:1px solid #e8ebf0;border-radius:18px;padding:18px;background:#fff;box-shadow:0 5px 18px #00000008}
+.card h3{margin:8px 0 5px}.card p{margin:0;color:#697586;font-size:13px}
+button{width:100%;border:0;border-radius:14px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.primary{background:#6c4cff;color:#fff}.secondary{background:#eeeaff;color:#5538d8}
+.section{margin-top:18px}.section h2{font-size:19px}
+.input{width:100%;padding:13px;border:1px solid #dce1e8;border-radius:12px;margin:6px 0 10px;font-size:15px}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(480px,100%);background:white;border-top:1px solid #e8ebf0;display:grid;grid-template-columns:repeat(3,1fr);padding:8px}
+.nav button{background:white;color:#697586}.nav button.active{color:#6c4cff}
+.badge{display:inline-block;background:#eeeaff;color:#5538d8;border-radius:99px;padding:5px 9px;font-size:12px}
+#notice{margin-top:12px;color:#4b5563;font-size:13px;min-height:18px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="muted">Welcome to</div>
+  <h1>Sumaya Earn</h1>
+  <div class="balance">Your balance <b id="coins">0 🪙</b><span class="muted">Demo balance</span></div>
+</header>
+
+<main>
+<section id="home">
+  <div class="section">
+    <h2>Earn Coins</h2>
+    <div class="grid">
+      <div class="card">
+        <div>📺</div><h3>Watch Ad</h3><p>Demo reward: +10 coins</p><br>
+        <button class="primary" onclick="watchAd()">Watch Ad</button>
+      </div>
+      <div class="card">
+        <div>👥</div><h3>Invite</h3><p>Share your referral link</p><br>
+        <button class="secondary" onclick="invite()">Invite Friends</button>
+      </div>
+    </div>
+    <div id="notice"></div>
+  </div>
+
+  <div class="section">
+    <h2>Quick Withdraw</h2>
+    <div class="card">
+      <span class="badge">Minimum: 1,000 coins</span>
+      <p style="margin-top:10px">Demo only. Real payments are not connected.</p>
+      <button class="primary" onclick="show('withdraw')">Withdraw</button>
+    </div>
+  </div>
+</section>
+
+<section id="withdraw" style="display:none">
+  <h2>💰 Withdraw</h2>
+  <div class="card">
+    <label>Method</label>
+    <select id="method" class="input"><option>bKash</option><option>Nagad</option><option>Rocket</option></select>
+    <label>Account number</label>
+    <input id="account" class="input" placeholder="01XXXXXXXXX">
+    <label>Coins</label>
+    <input id="amount" class="input" type="number" placeholder="1000">
+    <button class="primary" onclick="withdraw()">Submit Request</button>
+    <p style="margin-top:10px;color:#697586;font-size:13px">Demo request only; no money is sent.</p>
+  </div>
+</section>
+
+<section id="profile" style="display:none">
+  <h2>👤 Profile</h2>
+  <div class="card">
+    <p>User ID: <b id="uid">demo-user</b></p>
+    <p>Coins: <b id="pc">0</b></p>
+    <p>Referral link:</p>
+    <input class="input" id="ref" readonly>
+    <button class="secondary" onclick="copyRef()">Copy Referral Link</button>
+  </div>
+</section>
+</main>
+
+<div class="nav">
+<button class="active" onclick="show('home',this)">🏠 Home</button>
+<button onclick="show('withdraw',this)">💰 Withdraw</button>
+<button onclick="show('profile',this)">👤 Profile</button>
+</div>
+</div>
+
+<script>
+let coins = Number(localStorage.getItem('sumaya_coins') || 0);
+const uid = localStorage.getItem('sumaya_uid') || ('demo' + Math.floor(Math.random()*900000+100000));
+localStorage.setItem('sumaya_uid',uid);
+document.getElementById('uid').textContent=uid;
+document.getElementById('ref').value=location.origin+location.pathname+'?ref='+uid;
+
+function update(){
+ document.getElementById('coins').textContent=coins+' 🪙';
+ document.getElementById('pc').textContent=coins;
+ localStorage.setItem('sumaya_coins',coins);
+}
+function notice(t){document.getElementById('notice').textContent=t}
+function watchAd(){
+ notice('Demo ad চলছে…');
+ setTimeout(()=>{coins+=10;update();notice('Ad completed (demo): +10 coins added.');},1800);
+}
+function invite(){
+ const link=document.getElementById('ref').value;
+ if(navigator.share) navigator.share({title:'Sumaya Earn',text:'Join Sumaya Earn',url:link});
+ else navigator.clipboard?.writeText(link),notice('Referral link copied.');
+}
+function copyRef(){navigator.clipboard?.writeText(document.getElementById('ref').value);notice('Referral link copied.')}
+function withdraw(){
+ const amount=Number(document.getElementById('amount').value||0);
+ const account=document.getElementById('account').value.trim();
+ if(amount<1000)return alert('Minimum 1,000 coins.');
+ if(amount>coins)return alert('Not enough coins.');
+ if(!/^01\d{9}$/.test(account))return alert('Enter a valid demo Bangladesh mobile number.');
+ coins-=amount;update();alert('Demo withdrawal request submitted. No real payment was made.');
+}
+function show(id,btn){
+ ['home','withdraw','profile'].forEach(x=>document.getElementById(x).style.display=x===id?'block':'none');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ update();
+}
+update();
+</script>
+</body>
+</html>
