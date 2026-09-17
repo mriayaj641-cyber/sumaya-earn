@@ -131,10 +131,17 @@ function update(){
  document.getElementById('pc').textContent=coins;
  localStorage.setItem('sumaya_coins',coins);
 }
-function notice(t){document.getElementById('notice').textContent=t}
 function watchAd(){
- notice('Demo ad চলছে…');
- setTimeout(()=>{coins+=10;update();notice('Ad completed (demo): +10 coins added.');},1800);
+  notice('বিজ্ঞাপন লোড হচ্ছে…');
+
+  show_11783548().then(() => {
+    coins += 10;
+    update();
+    notice('Ad completed: +10 coins added.');
+  }).catch(() => {
+    notice('বিজ্ঞাপন দেখানো যায়নি। আবার চেষ্টা করুন।');
+  });
+}
 }
 function invite(){
  const link=document.getElementById('ref').value;
